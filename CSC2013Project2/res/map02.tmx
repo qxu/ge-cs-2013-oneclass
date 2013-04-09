@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="100" height="100" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="tiles" tilewidth="16" tileheight="16">
+  <image source="tiles.png" width="262" height="64"/>
+ </tileset>
+ <tileset firstgid="65" name="collision" tilewidth="16" tileheight="16">
+  <image source="collision.png" width="80" height="32"/>
+  <tile id="0">
+   <properties>
+    <property name="collide" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="75" name="key" tilewidth="16" tileheight="16">
+  <image source="key.png" trans="ff00ff" width="16" height="16"/>
+  <tile id="0">
+   <properties>
+    <property name="keyed" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="76" name="door" tilewidth="16" tileheight="16">
+  <image source="doors.png" trans="ff00ff" width="64" height="16"/>
+  <tile id="0">
+   <properties>
+    <property name="doored" value="true"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="doored" value="true"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="doored" value="true"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="doored" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="80" name="end" tilewidth="16" tileheight="16">
+  <image source="flashy.png" trans="ff00ff" width="48" height="16"/>
+  <tile id="1">
+   <properties>
+    <property name="ended" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="oldkeys" width="100" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3BMQEAAADCoPVP7WULoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBt5RKnmQJwAAA==
+  </data>
+ </layer>
+ <layer name="collision" width="100" height="100">
+  <properties>
+   <property name="collide" value="true"/>
+  </properties>
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3WW4rDMAwF0Gwt+99UP+ajxbUdyXLp0JwDodTkAbqRo+PgV50vB993Nr/scQaP3nXtb/bgXaQu0Tx2P/eOou/37LrMfexzc9X3O5pH9Xl3Ud3/I/WVR1y1LpG+kEdctAdW5qTR9e0aMaN3eWUvG9VdHnGzPDLXzfriznlUZ9reerY/MnPAr4vOQO1aNo/Reb173j2PyAx0NGuZ/UoeNat5ZGdbecSs5BG9jzzy5PG/RL7NV3OZ/Wqf7MyVuV80a5529sds3r16Pn8+WbPe3qQ/5q5q1r7zs3Ou9qRs79xRNI9ZPtlnjNao1UV/7Lf6zR7tY+3/yCzM0456XOXSW5dH32pfVPup2peV7xnvdtZQHnWf6jsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADyHg996htAnAAA
+  </data>
+ </layer>
+ <layer name="tiles" width="100" height="100" opacity="0.55">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3aXWvUQBQG4PGDli0irEi9Fgteq72p+P9/lxnp4DQ985HsSmV5HjgXbbJhmbdnZpI0JS7Vr6W+L/Xw0l+EP+6W+rDU7Ut/kQuT/85/DCrqgXUepV9mS1/F8rh+GdSx8bk6j4+PP89WdE3+5vFqqdeNOjQ+F+WRr/OmU2+TPHpKHp93fC7K41vqz03lPHnESh55HEfrSF33aX6+qsdeHn0z60eu1liXPN6l5/NcNDfJoy+PY2+uL2tL65xobSnqsS/7uNJXpR/ts+bl8cx5rO8xRnvbh+rzJY/WfKZP5rXyGO1tj6vz6jxKr9ln9e/9onljlEe0R86/O6zOO6bn64Z1JKWvadv92SiPaG97FZwnj1i0dvfmjT3zlTxO0xuX1rFervI4zZ48eteRx2nk8X/prc33nWOtc+Vxmt7afNs5tnU9bz3/ksdTvXuJQ3XsZrIOwbWvkvcgs8qY9Xph7zvZdR515mU/tvU5/6Vb59Hqk1q5z/8Z1HpdqfOInvPK46l1HjNrd67rFPfSp6DkMW9mvmrV+4nSH9vU+90t7wfrPVKdz3VV+RllvS+Qx9jW/wtp9Unv52gvJY9Y9J71X1W0F97TlzPvCtjmHH3pHuZ8ztmXvXf4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjP0GD7lDOUCcAAA=
+  </data>
+ </layer>
+ <layer name="key" width="100" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3XwQkAMAgDQPfr/vt0BfGRWribIAghWAUAGed1AAC+Z0sAAIDN/CzQoytZ7g0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwcwG2gUqDQJwAAA==
+  </data>
+ </layer>
+ <layer name="door" width="100" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3WoREAMAgDQAZk/3mqUSB6h+B/gqgkEQAAAABVbgcAAEZsNsBN+h8AgKu6L+wrAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPDTA0L9mE9AnAAA
+  </data>
+ </layer>
+ <layer name="end" width="100" height="100">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3YMQ0AAAgEsbeIfzMIYGEgYWkV3HwJAAAAAMBefQcAAAAAAACnvH8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACYGgN0D8dAnAAA
+  </data>
+ </layer>
+</map>
