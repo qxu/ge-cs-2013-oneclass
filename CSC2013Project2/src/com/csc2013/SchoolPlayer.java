@@ -9,10 +9,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.newdawn.slick.SlickException;
 
@@ -20,7 +20,7 @@ import com.csc2013.DungeonMaze.Action;
 import com.csc2013.DungeonMaze.BoxType;
 
 /**
- * Westhill's SchoolPlayer
+ * Westhill's SchoolPlayer implementation.
  * 
  * @author [Westhill/NullPointerException]
  * 
@@ -32,7 +32,7 @@ public class SchoolPlayer
 	private Action lastMove;
 	
 	/**
-	 * Constructor.
+	 * Creates a {@code SchoolPlayer}.
 	 * 
 	 * @throws SlickException
 	 */
@@ -61,13 +61,18 @@ public class SchoolPlayer
 			move = Action.Use;
 		}
 		
-		this.map.movePlayer(move);
-		this.lastMove = move;
+		if(move != Action.Use && move != Action.Pickup)
+		{
+			this.map.movePlayer(move);
+			this.lastMove = move;
+		}
+		
 		return move;
 	}
 	
 	/*
-	 * Calculates the best move.
+	 * Calculates the best move. It tries to find an exit, then it tries to find
+	 * a key, then it tries to uncover space.
 	 */
 	private Action getMove(int keyCount, boolean lastAction)
 	{
@@ -75,13 +80,14 @@ public class SchoolPlayer
 		MapPoint player = map.getPlayerPosition();
 		
 		Action exitAction = ActionAlgorithms
-				.actionTo(map, player, BoxType.Exit);
+				.actionTo(map, this.lastMove, player, BoxType.Exit);
 		if(exitAction != null)
 			return exitAction;
 		
 		if(keyCount < 8)
 		{
-			Action keyAction = ActionAlgorithms.actionTo(map, player,
+			Action keyAction = ActionAlgorithms.actionTo(map, this.lastMove,
+					player,
 					BoxType.Key);
 			if(keyAction != null)
 				return keyAction;
@@ -219,7 +225,7 @@ public class SchoolPlayer
 		 */
 		public MapPoint get(MapPoint point)
 		{
-			return gridRef.get(point);
+			return this.gridRef.get(point);
 		}
 		
 		/**
@@ -231,7 +237,7 @@ public class SchoolPlayer
 		 */
 		public BoxType getTypeOf(MapPoint point)
 		{
-			return typeMap.get(point);
+			return this.typeMap.get(point);
 		}
 		
 		/**
@@ -250,16 +256,16 @@ public class SchoolPlayer
 			if(type == null)
 				throw new NullPointerException();
 			MapPoint newPoint = new MapPoint(x, y, this);
-			MapPoint existingPoint = gridRef.get(newPoint);
+			MapPoint existingPoint = this.gridRef.get(newPoint);
 			if(existingPoint == null)
 			{
-				gridRef.put(newPoint, newPoint);
-				typeMap.put(newPoint, type);
+				this.gridRef.put(newPoint, newPoint);
+				this.typeMap.put(newPoint, type);
 				return newPoint;
 			}
 			else
 			{
-				typeMap.put(existingPoint, type);
+				this.typeMap.put(existingPoint, type);
 				return existingPoint;
 			}
 		}
@@ -284,7 +290,7 @@ public class SchoolPlayer
 		public Set<MapPoint> find(BoxType type)
 		{
 			Set<MapPoint> found = new HashSet<>();
-			for(Map.Entry<MapPoint, BoxType> entry : typeMap.entrySet())
+			for(Map.Entry<MapPoint, BoxType> entry : this.typeMap.entrySet())
 			{
 				if(entry.getValue() == type)
 				{
@@ -355,8 +361,8 @@ public class SchoolPlayer
 			MapPoint cachedW = this.west;
 			if(cachedW != null)
 				return cachedW;
-			MapPoint w = new MapPoint(x - 1, y, map);
-			MapPoint mapW = map.get(w);
+			MapPoint w = new MapPoint(this.x - 1, this.y, this.map);
+			MapPoint mapW = this.map.get(w);
 			return (mapW != null) ? (this.west = mapW) : w;
 		}
 		
@@ -370,8 +376,8 @@ public class SchoolPlayer
 			MapPoint cachedE = this.east;
 			if(cachedE != null)
 				return cachedE;
-			MapPoint e = new MapPoint(x + 1, y, map);
-			MapPoint mapE = map.get(e);
+			MapPoint e = new MapPoint(this.x + 1, this.y, this.map);
+			MapPoint mapE = this.map.get(e);
 			return (mapE != null) ? (this.east = mapE) : e;
 		}
 		
@@ -385,8 +391,8 @@ public class SchoolPlayer
 			MapPoint cachedN = this.north;
 			if(cachedN != null)
 				return cachedN;
-			MapPoint n = new MapPoint(x, y - 1, map);
-			MapPoint mapN = map.get(n);
+			MapPoint n = new MapPoint(this.x, this.y - 1, this.map);
+			MapPoint mapN = this.map.get(n);
 			return (mapN != null) ? (this.north = mapN) : n;
 		}
 		
@@ -400,8 +406,8 @@ public class SchoolPlayer
 			MapPoint cachedS = this.south;
 			if(cachedS != null)
 				return cachedS;
-			MapPoint s = new MapPoint(x, y + 1, map);
-			MapPoint mapS = map.get(s);
+			MapPoint s = new MapPoint(this.x, this.y + 1, this.map);
+			MapPoint mapS = this.map.get(s);
 			return (mapS != null) ? (this.south = mapS) : s;
 		}
 		
@@ -1038,9 +1044,7 @@ public class SchoolPlayer
 				MapPoint curPoint = cur.getLastPoint();
 				
 				if(curPoint.equals(dest))
-				{
-					return cur; //TODO fix add paths
-				}
+					return cur;
 				
 				closed.add(curPoint);
 				
@@ -1124,7 +1128,8 @@ public class SchoolPlayer
 		 * @param dest
 		 * @return
 		 */
-		public static Action actionTo(PlayerMap map, MapPoint start,
+		public static Action actionTo(PlayerMap map, Action lastMove,
+				MapPoint start,
 				BoxType dest)
 		{
 			Set<MapPoint> destPoints = map.find(dest);
@@ -1145,37 +1150,11 @@ public class SchoolPlayer
 				moves.add(getPathAction(path));
 			}
 			
-			Set<Action> desirable = EnumSet.noneOf(Action.class);
-			
-			for(Action move : moves)
-			{
-				if(desirableEndResult(start, move))
-				{
-					desirable.add(move);
-				}
-			}
-			
-			if(!desirable.isEmpty())
-			{
-				if(desirable.size() == 1)
-				{
-					return desirable.iterator().next();
-				}
-				else
-				{
-					System.out.println("not sure which desiarable");
-					return desirable.iterator().next();
-				}
-			}
-			else
-			{
-				System.out.println("not sure which");
-				return moves.iterator().next();
-			}
+			return chooseBestMove(start, lastMove, moves);
 		}
 		
 		/*
-		 * Returns the Action to execute the path. TODO make Action.Use work.
+		 * Returns the Action to execute the path.
 		 */
 		private static Action getPathAction(MapPath path)
 		{
@@ -1202,7 +1181,7 @@ public class SchoolPlayer
 		 * @param start
 		 * @param lastMove
 		 * @param keyCount
-		 * @return
+		 * @return the best action
 		 */
 		public static Action discoveryChannel(MapPoint start, Action lastMove,
 				int keyCount)
@@ -1218,13 +1197,22 @@ public class SchoolPlayer
 				moves.add(getPathAction(path));
 			}
 			
+			return chooseBestMove(start, lastMove, moves);
+		}
+		
+		/*
+		 * Chooses the best move from a set of moves.
+		 */
+		private static Action chooseBestMove(MapPoint start, Action lastMove,
+				Set<Action> moves)
+		{
+			// continue in the same direction, if possible
+			// this way, we explore edges and corners efficiently
+			// and we avoid the "zigzag effect"
 			if(moves.contains(lastMove))
-			{
 				return lastMove;
-			}
 			
 			Set<Action> desirable = EnumSet.noneOf(Action.class);
-			
 			for(Action move : moves)
 			{
 				if(desirableEndResult(start, move))
@@ -1236,22 +1224,22 @@ public class SchoolPlayer
 			if(!desirable.isEmpty())
 			{
 				if(desirable.size() == 1)
-				{
 					return desirable.iterator().next();
-				}
-				else if(desirable.contains(lastMove))
-				{
-					return lastMove;
-				}
 				else
 				{
-					System.out.println("not sure which desiarable");
+					if(desirable.contains(Action.East))
+						return Action.East;
+					else if(desirable.contains(Action.South))
+						return Action.South;
 					return desirable.iterator().next();
 				}
 			}
 			else
 			{
-				System.out.println("not sure which");
+				if(moves.contains(Action.East))
+					return Action.East;
+				else if(moves.contains(Action.South))
+					return Action.South;
 				return moves.iterator().next();
 			}
 		}
@@ -1264,9 +1252,7 @@ public class SchoolPlayer
 		{
 			MapPoint cur = start;
 			if(move == Action.Pickup)
-			{
 				return cur.getType() == BoxType.Key;
-			}
 			while(cur.getType() != BoxType.Blocked && cur.getType() != null)
 			{
 				MapPoint next = cur.execute(move);
