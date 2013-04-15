@@ -1,5 +1,6 @@
 package com.csc2013;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -14,36 +15,53 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
-import org.newdawn.slick.SlickException;
-
 import com.csc2013.DungeonMaze.Action;
 import com.csc2013.DungeonMaze.BoxType;
 
 /**
- * Westhill's SchoolPlayer implementation.
+ * Westhill's SchoolPlayer implementation. The final version was in multiple
+ * classes with a very nice GUI showing how the path-finding algorithms worked.
+ * Very nice for showing to our comp-sci class a breadth-first implementation of
+ * Dijstrika's algorithm, as well as an a* algorithm to find a specific
+ * destination even faster. Unfortunately, the guys at GE wanted just the
+ * SchoolPlayer class, so we fit it all into one massive class and cut out the
+ * debugger class to improve performance (and since this is the official final
+ * version, we don't need it anyways).
  * 
  * @author [Westhill/NullPointerException]
- * 
+ * @see <a href="https://github.com/qxu/ge-cs-2013">GitHub final version
+ *      (seperate classes, includes debugger)</a>
+ * @see <a href="https://github.com/qxu/ge-cs-2013-oneclass">GitHub one-class
+ *      version (everything is in one SchoolPlayer.java class)</a>
  */
 public class SchoolPlayer
 {
+	/*
+	 * A map to store the points with their BoxTypes.
+	 */
 	private final PlayerMap map;
 	
+	/*
+	 * The last directional move.
+	 * This means we ignore Action.Pickup and Action.Open
+	 */
 	private Action lastMove;
 	
 	/**
 	 * Creates a {@code SchoolPlayer}.
-	 * 
-	 * @throws SlickException
 	 */
-	public SchoolPlayer() throws SlickException
+	public SchoolPlayer()
 	{
 		this.map = new PlayerMap();
 	}
 	
 	/**
 	 * Gets the move.<br>
-	 * Updates the map.
+	 * Updates the map.<br>
+	 * <br>
+	 * If an exit is found, the action to the nearest exit is returned. Then the
+	 * algorithm searches for keys, then for unknown spaces. Doors are unlocked
+	 * as necessary to explore the unknown spaces.
 	 * 
 	 * @param vision
 	 * @param keyCount
@@ -98,19 +116,27 @@ public class SchoolPlayer
 		if(coverSpaceAction != null)
 			return coverSpaceAction;
 		
-		System.out.println("??");
+		System.out.println("?!!?!");
 		throw new RuntimeException("out of moves");
 	}
 	
 	/*
-	 * Updates the map from the given vision around the current player position.
+	 * Updates the map's BoxTypes from the given vision around the current
+	 * player position.
+	 * 
+	 * So some grid geometry got us those coordinates to update around each
+	 * point.
+	 * 
+	 * You might wonder why we have to subtract/add 1 to the the x/y coordinate.
+	 * That's because the west, east, north, and south arrays start at index 0,
+	 * but at index 0, the point is distance 1 from the player.
 	 */
 	private void updateMap(PlayerVision vision)
 	{
 		MapPoint player = this.map.getPlayerPosition();
 		
-		int centerX = player.x;
-		int centerY = player.y;
+		int playerX = player.x;
+		int playerY = player.y;
 		
 		int westOffset = vision.mWest;
 		int eastOffset = vision.mEast;
@@ -127,40 +153,40 @@ public class SchoolPlayer
 		for(int i = westOffset - 1; i >= 0; --i)
 		{
 			MapBox cell = west[i];
-			map.set(centerX - i - 2, centerY, cell.West);
-			map.set(centerX - i - 1, centerY - 1, cell.North);
-			map.set(centerX - i - 1, centerY + 1, cell.South);
+			map.set(playerX - i - 2, playerY, cell.West);
+			map.set(playerX - i - 1, playerY - 1, cell.North);
+			map.set(playerX - i - 1, playerY + 1, cell.South);
 		}
 		for(int i = eastOffset - 1; i >= 0; --i)
 		{
 			MapBox cell = east[i];
-			map.set(centerX + i + 2, centerY, cell.East);
-			map.set(centerX + i + 1, centerY - 1, cell.North);
-			map.set(centerX + i + 1, centerY + 1, cell.South);
+			map.set(playerX + i + 2, playerY, cell.East);
+			map.set(playerX + i + 1, playerY - 1, cell.North);
+			map.set(playerX + i + 1, playerY + 1, cell.South);
 		}
 		for(int i = northOffset - 1; i >= 0; --i)
 		{
 			MapBox cell = north[i];
-			map.set(centerX, centerY - i - 2, cell.North);
-			map.set(centerX - 1, centerY - i - 1, cell.West);
-			map.set(centerX + 1, centerY - i - 1, cell.East);
+			map.set(playerX, playerY - i - 2, cell.North);
+			map.set(playerX - 1, playerY - i - 1, cell.West);
+			map.set(playerX + 1, playerY - i - 1, cell.East);
 		}
 		for(int i = southOffset - 1; i >= 0; --i)
 		{
 			MapBox cell = south[i];
-			map.set(centerX, centerY + i + 2, cell.South);
-			map.set(centerX - 1, centerY + i + 1, cell.West);
-			map.set(centerX + 1, centerY + i + 1, cell.East);
+			map.set(playerX, playerY + i + 2, cell.South);
+			map.set(playerX - 1, playerY + i + 1, cell.West);
+			map.set(playerX + 1, playerY + i + 1, cell.East);
 		}
 		
 		MapBox current = vision.CurrentPoint;
 		
-		map.set(centerX, centerY, current.hasKey() ? BoxType.Key : BoxType.Open);
+		map.set(playerX, playerY, current.hasKey() ? BoxType.Key : BoxType.Open);
 		
-		map.set(centerX - 1, centerY, current.West);
-		map.set(centerX + 1, centerY, current.East);
-		map.set(centerX, centerY - 1, current.North);
-		map.set(centerX, centerY + 1, current.South);
+		map.set(playerX - 1, playerY, current.West);
+		map.set(playerX + 1, playerY, current.East);
+		map.set(playerX, playerY - 1, current.North);
+		map.set(playerX, playerY + 1, current.South);
 	}
 	
 	/**
@@ -936,8 +962,9 @@ public class SchoolPlayer
 		/*
 		 * Since opening a door takes two steps, the algorithm can't just add
 		 * one to get the g score of the next point. There is a penalty for
-		 * going through doors. The same thing is not as severe for keys, so the
-		 * algorithm will just waltz over the keys. No biggie.
+		 * going through doors. The same thing is not as severe for keys, and we
+		 * wouldn't want to penalize for walking over keys, so the algorithm
+		 * will just waltz over the keys. No biggie.
 		 */
 		private static int distanceTo(MapPoint point)
 		{
@@ -1073,7 +1100,7 @@ public class SchoolPlayer
 		}
 		
 		/*
-		 * Returns the manhattan distance from a point to a destination.
+		 * Returns the Manhattan distance from a point to a destination.
 		 */
 		private static int heuristicEstimate(MapPoint point, MapPoint dest)
 		{
@@ -1095,7 +1122,7 @@ public class SchoolPlayer
 		private static Iterable<MapPoint> getNeighbors(MapPoint point,
 				MapPoint dest)
 		{
-			Collection<MapPoint> neighbors = new HashSet<>(4);
+			Collection<MapPoint> neighbors = new ArrayList<>(4); //lol, the only time we use an ArrayList
 			for(MapPoint neighbor : point.getNeighbors())
 			{
 				if(neighbor != null)
@@ -1158,8 +1185,8 @@ public class SchoolPlayer
 		 */
 		private static Action getPathAction(MapPath path)
 		{
-			final MapPoint player = path.toList().get(0);
-			final MapPoint point = path.getStepPath().getLastPoint();
+			MapPoint player = path.toList().get(0);
+			MapPoint point = path.getStepPath().getLastPoint();
 			if(player.equals(point))
 				return Action.Pickup;
 			return player.actionTo(point);
@@ -1167,7 +1194,7 @@ public class SchoolPlayer
 		
 		/*
 		 * Returns the action to get from a starting point to a destination
-		 * point.
+		 * point using the a* algorithm.
 		 */
 		private static Action aStarAction(MapPoint start, MapPoint dest)
 		{
@@ -1186,6 +1213,7 @@ public class SchoolPlayer
 		public static Action discoveryChannel(MapPoint start, Action lastMove,
 				int keyCount)
 		{
+			// null is an unknown
 			Set<MapPath> paths = BFSearch.search(start, null, keyCount);
 			
 			if(paths.isEmpty())
@@ -1227,20 +1255,24 @@ public class SchoolPlayer
 					return desirable.iterator().next();
 				else
 				{
+					// prefer east and south to other directions.
 					if(desirable.contains(Action.East))
 						return Action.East;
 					else if(desirable.contains(Action.South))
 						return Action.South;
-					return desirable.iterator().next();
+					else
+						return desirable.iterator().next();
 				}
 			}
 			else
 			{
+				// like above, prefer east and south to other directions.
 				if(moves.contains(Action.East))
 					return Action.East;
 				else if(moves.contains(Action.South))
 					return Action.South;
-				return moves.iterator().next();
+				else
+					return moves.iterator().next();
 			}
 		}
 		
@@ -1253,14 +1285,25 @@ public class SchoolPlayer
 			MapPoint cur = start;
 			if(move == Action.Pickup)
 				return cur.getType() == BoxType.Key;
-			while(cur.getType() != BoxType.Blocked && cur.getType() != null)
+			
+			// this loop gets the result BoxType after continuing to
+			// travel in 'move' until it hits
+			while(canTravelOn(cur.getType()))
 			{
 				MapPoint next = cur.execute(move);
 				if(next.equals(cur))
 					return false;
 				cur = next;
 			}
+			
+			// if the end result is unknown, then more space is explored.
 			return cur.getType() == null;
+		}
+		
+		private static boolean canTravelOn(BoxType type)
+		{
+			// BoxTypes Open and Key can be traveled on.
+			return type == BoxType.Open || type == BoxType.Key;
 		}
 	}
 }
